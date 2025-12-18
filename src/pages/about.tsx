@@ -1,4 +1,6 @@
+import { readFile } from 'node:fs/promises';
 import { Link } from 'waku';
+import { marked } from 'marked';
 
 export default async function AboutPage() {
   const data = await getData();
@@ -6,8 +8,7 @@ export default async function AboutPage() {
   return (
     <div>
       <title>{data.title}</title>
-      <h1 className="text-4xl font-bold tracking-tight">{data.headline}</h1>
-      <p>{data.body}</p>
+      <div dangerouslySetInnerHTML={{ __html: data.contentHtml }} />
       <Link to="/" className="mt-4 inline-block underline">
         Return home
       </Link>
@@ -16,13 +17,13 @@ export default async function AboutPage() {
 }
 
 const getData = async () => {
-  const data = {
-    title: 'About',
-    headline: 'About Waku',
-    body: 'The minimal React framework',
-  };
+  const markdown = await readFile('src/content/about.md', 'utf-8');
+  const contentHtml = await marked.parse(markdown);
 
-  return data;
+  return {
+    title: 'About',
+    contentHtml,
+  };
 };
 
 export const getConfig = async () => {
